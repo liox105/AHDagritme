@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AH Werkschema Manager - Antwerpen Groenplaats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <span class="material-icons">menu</span>
+                </button>
+                <div class="logo">
+                    <span class="logo-ah">AH</span>
+                    <span class="logo-text">Werkschema Manager</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="store-selector">
+                    <span class="material-icons">store</span>
+                    <select id="storeSelect" onchange="changeStore(this.value)">
+                        <option value="3138">3138 - Antwerpen Groenplaats</option>
+                        <option value="3002">3002 - Pelt</option>
+                        <option value="3015">3015 - Antwerpen Hessenplein</option>
+                        <option value="3021">3021 - Beveren</option>
+                    </select>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" id="darkModeToggle" onclick="toggleDarkMode()" title="Donkere modus">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+                <div class="undo-redo-buttons">
+                    <button class="btn-icon" id="undoBtn" onclick="undo()" title="Ongedaan maken (Ctrl+Z)" disabled>
+                        <span class="material-icons">undo</span>
+                    </button>
+                    <button class="btn-icon" id="redoBtn" onclick="redo()" title="Opnieuw (Ctrl+Y)" disabled>
+                        <span class="material-icons">redo</span>
+                    </button>
+                </div>
+                <div class="week-selector">
+                    <button class="btn-icon" onclick="previousWeek()">
+                        <span class="material-icons">chevron_left</span>
+                    </button>
+                    <span id="weekDisplay">Week 52 - 2025</span>
+                    <button class="btn-icon" onclick="nextWeek()">
+                        <span class="material-icons">chevron_right</span>
+                    </button>
+                </div>
+                <div class="user-menu">
+                    <span class="material-icons">account_circle</span>
+                    <span>Manager</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" onclick="showPage('dashboard')">
+                    <span class="material-icons">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('schedule')">
+                    <span class="material-icons">calendar_today</span>
+                    <span>Rooster</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('planning')">
+                    <span class="material-icons">view_week</span>
+                    <span>Planning</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('employees')">
+                    <span class="material-icons">people</span>
+                    <span>Medewerkers</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('tasks')">
+                    <span class="material-icons">assignment</span>
+                    <span>Taken</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('budget')">
+                    <span class="material-icons">account_balance</span>
+                    <span>Begroting</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('reports')">
+                    <span class="material-icons">bar_chart</span>
+                    <span>Rapportage</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('settings')">
+                    <span class="material-icons">settings</span>
+                    <span>Instellingen</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="page-dashboard" class="page active">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p class="subtitle" id="currentDate">Maandag 23 december 2025</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <span class="material-icons">schedule</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Geplande Uren</h3>
+                            <p class="stat-value" id="statHours">245</p>
+                            <span class="stat-label">van 260 budget</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <span class="material-icons">people</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Actieve Medewerkers</h3>
+                            <p class="stat-value" id="statEmployees">24</p>
+                            <span class="stat-label">ingeroosterd deze week</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <span class="material-icons">trending_up</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Budget Usage</h3>
+                            <p class="stat-value" id="statBudget">94%</p>
+                            <span class="stat-label">van budget gebruikt</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <span class="material-icons">euro</span>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Verwachte Omzet</h3>
+                            <p class="stat-value" id="statRevenue">€369K</p>
+                            <span class="stat-label">deze week</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Overview -->
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Rooster Vandaag</h2>
+                            <span class="badge" id="todayShifts">12 shifts</span>
+                        </div>
+                        <div class="card-content" id="todaySchedule">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Budget Overzicht</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="budget-bars" id="budgetBars">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Week Mini Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Week Overzicht</h2>
+                        <div class="card-actions">
+                            <button class="btn-icon" title="Sneltoetsen (Shift+/)" onclick="openShortcutsModal()">
+                                <span class="material-icons">help_outline</span>
+                            </button>
+                        <button class="btn btn-primary" onclick="showPage('schedule')">
+                            <span class="material-icons">edit</span>
+                            Bewerken
+                        </button>
+                        </div>
+                    </div>
+                    <div class="week-mini-grid" id="weekMiniGrid">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Page -->
+            <div id="page-schedule" class="page">
+                <div class="page-header">
+                    <h1>Weekrooster</h1>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="autoSchedule()">
+                            <span class="material-icons">auto_fix_high</span>
+                            Auto-plannen
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyWeekTo()">
+                            <span class="material-icons">content_copy</span>
+                            Kopieer Week
+                        </button>
+                        <button class="btn btn-danger" onclick="clearWeek()">
+                            <span class="material-icons">delete_sweep</span>
+                            Wis Week
+                        </button>
+                        <button class="btn btn-secondary" onclick="printSchedule()">
+                            <span class="material-icons">print</span>
+                            Afdrukken
+                        </button>
+                        <button class="btn btn-primary" onclick="openAddShiftModal()">
+                            <span class="material-icons">add</span>
+                            Shift Toevoegen
+                        </button>
+                    </div>
+                </div>
+
+                <div class="schedule-container">
+                    <div class="schedule-grid" id="scheduleGrid">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employees Page -->
+            <div id="page-employees" class="page">
+                <div class="page-header">
+                    <h1>Medewerkers</h1>
+                    <button class="btn btn-primary" onclick="openAddEmployeeModal()">
+                        <span class="material-icons">person_add</span>
+                        Medewerker Toevoegen
+                    </button>
+                </div>
+
+                <div class="card">
+                    <!-- Search and Filter Bar -->
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <span class="material-icons">search</span>
+                            <input type="text" id="employeeSearch" placeholder="Zoeken op naam..." oninput="filterEmployees()">
+                        </div>
+                        <div class="filter-group">
+                            <select id="filterFunction" onchange="filterEmployees()">
+                                <option value="">Alle functies</option>
+                                <option value="SM">Supermarktmanager</option>
+                                <option value="MO">Manager Operatie</option>
+                                <option value="MV">Manager Vers</option>
+                                <option value="MS">Manager Service</option>
+                                <option value="SL">Shiftleider</option>
+                                <option value="MW">Medewerker</option>
+                                <option value="KW">Medewerker Kwaliteit</option>
+                                <option value="Cas B">Caissière B</option>
+                                <option value="Cas A">Caissière A</option>
+                                <option value="JOB">Jobstudent</option>
+                                <option value="IMW">Interim</option>
+                            </select>
+                            <select id="filterStatus" onchange="filterEmployees()">
+                                <option value="">Alle statussen</option>
+                                <option value="active">Actief</option>
+                                <option value="inactive">Inactief</option>
+                            </select>
+                            <button class="btn btn-secondary btn-small" onclick="clearEmployeeFilters()">
+                                <span class="material-icons">clear</span>
+                                Reset
+                            </button>
+                        </div>
+                        <div class="filter-count" id="employeeFilterCount">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table" id="employeesTable">
+                            <thead>
+                                <tr>
+                                    <th>Naam</th>
+                                    <th>Functie</th>
+                                    <th>Contract</th>
+                                    <th>Gepland</th>
+                                    <th>Beschikbaar</th>
+                                    <th>Status</th>
+                                    <th>Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Page -->
+            <div id="page-tasks" class="page">
+                <div class="page-header">
+                    <h1>Taken & Normen</h1>
+                </div>
+
+                <div class="tasks-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Houdbaar</h2>
+                            <span class="category-badge houdbaar">Droge waren</span>
+                        </div>
+                        <div class="card-content" id="tasksHoudbaar">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Vers</h2>
+                            <span class="category-badge vers">Verse producten</span>
+                        </div>
+                        <div class="card-content" id="tasksVers">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Diepvries</h2>
+                            <span class="category-badge diepvries">Gekoeld</span>
+                        </div>
+                        <div class="card-content" id="tasksDiepvries">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Service</h2>
+                            <span class="category-badge service">Klantenservice</span>
+                        </div>
+                        <div class="card-content" id="tasksService">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Page -->
+            <div id="page-budget" class="page">
+                <div class="page-header">
+                    <h1>Begroting</h1>
+                </div>
+
+                <div class="budget-calculator">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Omzet & Uren Calculator</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Standaard Omzet</label>
+                                    <input type="text" id="standardRevenue" value="€369.312" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Verwachte Omzet</label>
+                                    <input type="number" id="expectedRevenue" value="369312" onchange="calculateBudget()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Feestdag Factor</label>
+                                    <select id="holidayFactor" onchange="calculateBudget()">
+                                        <option value="1">Geen feestdag (100%)</option>
+                                        <option value="0.833">Feestdag (83.3%)</option>
+                                        <option value="0.5">Nieuwjaar (50%)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Berekende Uren per Taak</h2>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="budgetTable">
+                                <thead>
+                                    <tr>
+                                        <th>Taak</th>
+                                        <th>Norm (uren)</th>
+                                        <th>Berekend</th>
+                                        <th>Gepland</th>
+                                        <th>Verschil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Verdeling per Dag</h2>
+                        </div>
+                        <div class="day-distribution" id="dayDistribution">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planning Overview Page -->
+            <div id="page-planning" class="page">
+                <div class="page-header">
+                    <h1>Planning Overzicht</h1>
+                    <p class="subtitle">Week <span id="planningWeekNum">1</span> - Alle medewerkers</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Medewerker Weekoverzicht</h2>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary btn-small" onclick="window.print()">
+                                <span class="material-icons">print</span> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="table-container">
+                            <table class="data-table planning-table" id="planningTable">
+                                <thead id="planningTableHead">
+                                    <!-- Filled by JavaScript -->
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planning-summary card">
+                    <div class="card-header">
+                        <h2>Dagelijks Overzicht</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="day-summary-grid" id="daySummaryGrid">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="page-reports" class="page">
+                <div class="page-header">
+                    <h1>Rapportage</h1>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="exportToCSV()">
+                            <span class="material-icons">download</span>
+                            Export CSV
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportToJSON()">
+                            <span class="material-icons">code</span>
+                            Export JSON
+                        </button>
+                        <label class="btn btn-secondary" style="cursor: pointer;">
+                            <span class="material-icons">upload</span>
+                            Import JSON
+                            <input type="file" id="importFile" accept=".json" onchange="importFromJSON(this)" style="display: none;">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Week Summary Cards -->
+                <div class="summary-stats" id="reportsSummary">
+                    <!-- Filled by JS -->
+                </div>
+
+                <div class="reports-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Uren per Medewerker (Top 10)</h2>
+                        </div>
+                        <div class="chart-container" id="hoursChart">
+                            <!-- Simple bar chart -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Budget vs Werkelijk per Dag</h2>
+                        </div>
+                        <div class="chart-container" id="budgetChart">
+                            <!-- Simple comparison chart -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Uren per Categorie</h2>
+                        </div>
+                        <div class="chart-container" id="categoryChart">
+                            <!-- Category breakdown -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Medewerker Contract vs Gepland</h2>
+                        </div>
+                        <div class="chart-container" id="contractChart">
+                            <!-- Contract comparison -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="page-settings" class="page">
+                <div class="page-header">
+                    <h1>Instellingen</h1>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="saveSettings()">
+                            <span class="material-icons">save</span> Opslaan
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Winkel Instellingen</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label>Winkelnummer</label>
+                                <input type="text" id="settingStoreNumber" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Winkelnaam</label>
+                                <input type="text" id="settingStoreName">
+                            </div>
+                            <div class="form-group">
+                                <label>Standaard Omzet (€)</label>
+                                <input type="number" id="settingStandardRevenue">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Dag Distributie (%)</h2>
+                        </div>
+                        <div class="card-content" id="dayDistributionSettings">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Openingstijden</h2>
+                        </div>
+                        <div class="card-content" id="openingHoursSettings">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Werk Limieten</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label>Max uren per dag</label>
+                                <input type="number" id="settingMaxDaily" step="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Max uren per week</label>
+                                <input type="number" id="settingMaxWeekly" step="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Max dagen per week</label>
+                                <input type="number" id="settingMaxDays" min="1" max="7">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Data Beheer</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <button class="btn btn-secondary" onclick="exportData()">
+                                    <span class="material-icons">download</span> Exporteer Data
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label>Importeer Data</label>
+                                <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-danger" onclick="clearAllData()">
+                                    <span class="material-icons">delete_forever</span> Wis Alle Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Shift Modal -->
+    <div class="modal" id="shiftModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="shiftModalTitle">Shift Toevoegen</h2>
+                <button class="btn-icon" onclick="closeModal('shiftModal')">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="shiftType" onchange="toggleShiftType()">
+                        <option value="work">Werkshift</option>
+                        <option value="status">Status (OA, VRIJ, etc.)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Medewerker</label>
+                    <select id="shiftEmployee">
+                        <!-- Filled by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dag</label>
+                    <select id="shiftDay">
+                        <option value="0">Maandag</option>
+                        <option value="1">Dinsdag</option>
+                        <option value="2">Woensdag</option>
+                        <option value="3">Donderdag</option>
+                        <option value="4">Vrijdag</option>
+                        <option value="5">Zaterdag</option>
+                        <option value="6">Zondag</option>
+                    </select>
+                </div>
+                
+                <!-- Status Code (only shown when type=status) -->
+                <div class="form-group" id="statusCodeGroup" style="display: none;">
+                    <label>Status Code</label>
+                    <select id="shiftStatusCode">
+                        <option value="OA">OA - Onbetaald afwezig</option>
+                        <option value="TA">TA - Technische afwezigheid</option>
+                        <option value="VRIJ">VRIJ - Vrije dag</option>
+                        <option value="ST">ST - Studie</option>
+                        <option value="ZK">ZK - Ziekte</option>
+                        <option value="VL">VL - Verlof</option>
+                    </select>
+                </div>
+                
+                <!-- Work shift fields (only shown when type=work) -->
+                <div id="workShiftFields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Tijd</label>
+                            <input type="time" id="shiftStart" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Eind Tijd</label>
+                            <input type="time" id="shiftEnd" value="17:00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Pauze (minuten)</label>
+                            <input type="number" id="shiftBreak" value="0" step="15" min="0" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label>Netto Uren</label>
+                            <input type="text" id="shiftNetHours" readonly class="readonly-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Taken</label>
+                        <div class="task-checkboxes" id="shiftTasks">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notities</label>
+                        <textarea id="shiftNotes" rows="2" placeholder="Optionele opmerkingen..."></textarea>
+                    </div>
+                </div>
+                <!-- End of workShiftFields -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteShiftBtn" onclick="deleteShift()" style="display: none;">
+                    <span class="material-icons">delete</span> Verwijderen
+                </button>
+                <div style="flex-grow: 1;"></div>
+                <button class="btn btn-secondary" onclick="closeModal('shiftModal')">Annuleren</button>
+                <button class="btn btn-primary" onclick="saveShift()">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Employee Modal -->
+    <div class="modal" id="employeeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="employeeModalTitle">Medewerker Toevoegen</h2>
+                <button class="btn-icon" onclick="closeModal('employeeModal')">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Voornaam</label>
+                        <input type="text" id="empFirstName">
+                    </div>
+                    <div class="form-group">
+                        <label>Achternaam</label>
+                        <input type="text" id="empLastName">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Functie</label>
+                    <select id="empFunction">
+                        <option value="SM">Supermarktmanager</option>
+                        <option value="MO">Manager Operatie</option>
+                        <option value="MV">Manager Vers</option>
+                        <option value="MS">Manager Service</option>
+                        <option value="SL">Shiftleider</option>
+                        <option value="MW" selected>Medewerker</option>
+                        <option value="KW">Medewerker Kwaliteit</option>
+                        <option value="Cas B">Caissière B</option>
+                        <option value="Cas A">Caissière A</option>
+                        <option value="JOB">Jobstudent</option>
+                        <option value="IMW">Interim-Medewerker</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Contract Uren per Week</label>
+                    <input type="number" id="empContractHours" value="36" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label>Beschikbaarheid</label>
+                    <div class="availability-checkboxes" id="empAvailability">
+                        <label class="availability-day"><input type="checkbox" value="0" checked> Ma</label>
+                        <label class="availability-day"><input type="checkbox" value="1" checked> Di</label>
+                        <label class="availability-day"><input type="checkbox" value="2" checked> Wo</label>
+                        <label class="availability-day"><input type="checkbox" value="3" checked> Do</label>
+                        <label class="availability-day"><input type="checkbox" value="4" checked> Vr</label>
+                        <label class="availability-day"><input type="checkbox" value="5"> Za</label>
+                        <label class="availability-day"><input type="checkbox" value="6"> Zo</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Voorkeurstijden (optioneel) <small style="color: #999;">Laat leeg voor geen voorkeur</small></label>
+                    <div class="preferred-times" id="empPreferredTimes">
+                        <div class="preferred-time-row">
+                            <span class="day-label">Ma</span>
+                            <input type="time" data-day="0" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="0" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                        <div class="preferred-time-row">
+                            <span class="day-label">Di</span>
+                            <input type="time" data-day="1" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="1" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                        <div class="preferred-time-row">
+                            <span class="day-label">Wo</span>
+                            <input type="time" data-day="2" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="2" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                        <div class="preferred-time-row">
+                            <span class="day-label">Do</span>
+                            <input type="time" data-day="3" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="3" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                        <div class="preferred-time-row">
+                            <span class="day-label">Vr</span>
+                            <input type="time" data-day="4" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="4" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                        <div class="preferred-time-row">
+                            <span class="day-label">Za</span>
+                            <input type="time" data-day="5" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="5" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                        <div class="preferred-time-row">
+                            <span class="day-label">Zo</span>
+                            <input type="time" data-day="6" data-type="start" class="time-input-small" placeholder="Start">
+                            <span>-</span>
+                            <input type="time" data-day="6" data-type="end" class="time-input-small" placeholder="Eind">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteEmployeeBtn" onclick="deleteEmployee()" style="display: none;">
+                    <span class="material-icons">delete</span> Verwijderen
+                </button>
+                <div style="flex-grow: 1;"></div>
+                <button class="btn btn-secondary" onclick="closeModal('employeeModal')">Annuleren</button>
+                <button class="btn btn-primary" onclick="saveEmployee()">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Dialog Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 id="confirmTitle">Bevestigen</h2>
+                <button class="close-btn" onclick="closeConfirmModal(false)">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="text-align: center; padding: 20px 0; font-size: 16px;">
+                    Weet je zeker dat je dit wilt doen?
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center; gap: 16px;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal(false)">Annuleren</button>
+                <button class="btn btn-danger" id="confirmBtn" onclick="closeConfirmModal(true)">
+                    <span class="material-icons">check</span> Bevestigen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingText">Laden...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="material-icons toast-icon">check_circle</span>
+        <span class="toast-message">Opgeslagen!</span>
+    </div>
+
+    <!-- Shift Templates Modal -->
+    <div class="modal" id="templatesModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Shift Templates</h2>
+                <button class="btn-icon" onclick="closeModal('templatesModal')">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="templates-section">
+                    <div class="section-header">
+                        <h3>Opgeslagen Templates</h3>
+                        <button class="btn btn-primary btn-small" onclick="showSaveTemplateForm()">
+                            <span class="material-icons">add</span>
+                            Nieuw Template
+                        </button>
+                    </div>
+                    <div class="templates-grid" id="templatesGrid">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="save-template-form" id="saveTemplateForm" style="display: none;">
+                    <h4>Template Opslaan</h4>
+                    <div class="form-group">
+                        <label>Template Naam</label>
+                        <input type="text" id="templateName" placeholder="bijv. Ochtend Ploeg">
+                    </div>
+                    <div class="form-group">
+                        <label>Beschrijving (optioneel)</label>
+                        <input type="text" id="templateDescription" placeholder="bijv. Standaard ochtendshift 6-14u">
+                    </div>
+                    <div class="form-group">
+                        <label>Selecteer Dag om te Kopiëren</label>
+                        <select id="templateSourceDay">
+                            <option value="0">Maandag</option>
+                            <option value="1">Dinsdag</option>
+                            <option value="2">Woensdag</option>
+                            <option value="3">Donderdag</option>
+                            <option value="4">Vrijdag</option>
+                            <option value="5">Zaterdag</option>
+                            <option value="6">Zondag</option>
+                        </select>
+                    </div>
+                    <div class="template-form-actions">
+                        <button class="btn btn-secondary" onclick="hideSaveTemplateForm()">Annuleren</button>
+                        <button class="btn btn-primary" onclick="saveTemplate()">Opslaan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortcuts & Tips Modal -->
+    <div class="modal" id="shortcutsModal">
+        <div class="modal-content" style="max-width: 640px;">
+            <div class="modal-header">
+                <h2>Sneltoetsen & Tips</h2>
+                <button class="btn-icon" onclick="closeModal('shortcutsModal')">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcut-grid">
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Cmd</span><span class="plus">+</span><span class="key">Z</span></div>
+                        <div class="desc">Ongedaan maken (Undo)</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Cmd</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">Z</span></div>
+                        <div class="desc">Opnieuw (Redo)</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Cmd</span><span class="plus">+</span><span class="key">Y</span></div>
+                        <div class="desc">Opnieuw (Redo)</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Shift</span><span class="plus">+</span><span class="key">/</span></div>
+                        <div class="desc">Toon sneltoetsen</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Cmd</span><span class="plus">+</span><span class="key">P</span></div>
+                        <div class="desc">Rooster afdrukken</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Cmd</span><span class="plus">+</span><span class="key">F</span></div>
+                        <div class="desc">Zoek medewerkers (op Medewerkers pagina)</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="keys"><span class="key">Cmd</span><span class="plus">+</span><span class="key">Alt</span><span class="plus">+</span><span class="key">D</span></div>
+                        <div class="desc">Donkere modus wisselen</div>
+                    </div>
+                </div>
+                <div class="tips">
+                    <p><strong>Tip:</strong> Gebruik de <em>Week Overzicht</em> kaart om snel naar het Rooster te gaan.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div style="flex-grow:1"></div>
+                <button class="btn btn-primary" onclick="closeModal('shortcutsModal')">Sluiten</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
