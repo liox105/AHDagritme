@@ -1,0 +1,21 @@
+# Excel files (keep only the main one)
+*.xls
+*.xlsx
+!*unprotected.xlsx
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.swp
+*~
